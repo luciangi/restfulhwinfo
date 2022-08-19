@@ -13,7 +13,10 @@ namespace restfulhwinfo
         static void Main(string[] args)
         {
             var app = WebApplication.CreateBuilder(args).Build();
-            app.MapGet("/", () => GetValueNames());
+            app.MapGet(
+                "/",
+                () => Results.Json(GetValueNames())
+            );
 
             app.Run(Url);
         }
