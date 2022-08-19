@@ -12,7 +12,14 @@ namespace restfulhwinfo
 
         static void Main(string[] args)
         {
-            var app = WebApplication.CreateBuilder(args).Build();
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+            {
+                builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+            }));
+            var app = builder.Build();
+
+            app.UseCors("corsapp");
             app.MapGet(
                 "/",
                 () => Results.Json(GetValueNames())
@@ -26,9 +33,8 @@ namespace restfulhwinfo
             return RegistryKey
                         .GetValueNames()
                         .ToList()
-                        .GroupBy(x => string.Join("", x.Reverse().TakeWhile(c => char.IsDigit(c)).Reverse()))
-                        .ToDictionary(x => x.Key, x => x.ToList().Select(l => new { Label = l, Value = RegistryKey.GetValue(l) }));
+                        .GroupBy(e => string.Join("", e.Reverse().TakeWhile(c => char.IsDigit(c)).Reverse()))
+                        .ToDictionary(e => e.Key, e => e.ToList().ToDictionary(label => label, label => RegistryKey.GetValue(label)));
         }
-
     }
 }
