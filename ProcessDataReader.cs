@@ -9,12 +9,12 @@ namespace restfulhwinfo
     {
         public record ProcessRecord(
             string Name,
-            [property:JsonProperty("Cpu (%)")]
+            [property:JsonProperty("Cpu")]
             ulong CpuUtilization,
-            [property:JsonProperty("Gpu (%)")]
+            [property:JsonProperty("Gpu")]
             ulong GpuUtilization,
-            [property:JsonProperty("Mem (%)")]
-            float MemUtilization
+            [property:JsonProperty(PropertyName = "Mem")]
+            ulong MemUtilization
         );
 
         private int ProcessorCount = Environment.ProcessorCount;
@@ -65,9 +65,9 @@ namespace restfulhwinfo
                         new ProcessRecord
                         (
                             Name: e.Key,
-                            CpuUtilization: 0Ul,
-                            GpuUtilization: 0Ul,
-                            MemUtilization: 0F
+                            CpuUtilization: 0UL,
+                            GpuUtilization: 0UL,
+                            MemUtilization: 0UL
                         ),
                         (a, mo) =>
                         {
@@ -77,13 +77,13 @@ namespace restfulhwinfo
                                 Name: e.Key,
                                 CpuUtilization: a.CpuUtilization + ((ulong)mo["PercentProcessorTime"]) / (ulong)ProcessorCount,
                                 GpuUtilization: a.GpuUtilization + gpuUtilization,
-                                MemUtilization: a.MemUtilization + (BToGB((ulong)mo["WorkingSetPrivate"]) * 100) / TotalPhysicalMemory
+                                MemUtilization: a.MemUtilization + (ulong)((BToGB((ulong)mo["WorkingSetPrivate"]) * 100) / TotalPhysicalMemory)
                             );
                         }
                     )
                 )
                 .OrderByDescending(p => p.CpuUtilization)
-                .Take(10)
+                .Take(5)
                 .ToList();
         }
 
