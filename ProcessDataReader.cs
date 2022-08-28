@@ -1,5 +1,6 @@
 using System.Management;
 using System.Runtime.Versioning;
+using Newtonsoft.Json;
 
 namespace restfulhwinfo
 {
@@ -7,12 +8,15 @@ namespace restfulhwinfo
     class ProcessesWmiReader
     {
         public record ProcessRecord(
-            uint Id,
             string Name,
+            [property:JsonProperty("Cpu (%)")]
             ulong CpuUtilization,
+            [property:JsonProperty("Gpu (%)")]
             ulong GpuUtilization,
-            float MemoryUtilization
+            [property:JsonProperty("Mem (%)")]
+            float MemUtilization
         );
+
         private int ProcessorCount = Environment.ProcessorCount;
         private float TotalPhysicalMemory;
         private ManagementObjectSearcher cpuSearcher;
@@ -55,19 +59,29 @@ namespace restfulhwinfo
             return this.cpuSearcher
                 .Get()
                 .Cast<ManagementObject>()
-                .Select(mo =>
-                {
-                    uint processId = (uint)mo["IDProcess"];
-                    processIdToGpu.TryGetValue(processId.ToString(), out ulong gpuUtilization);
+                .GroupBy(mo => ((string)mo["Name"]).Split("#")[0])
+                .Where(e => !new List<string> { "_Total", "Idle" }.Contains(e.Key))
+                .Select(e => e.Aggregate(
+                        new ProcessRecord
+                        (
+                            Name: e.Key,
+                            CpuUtilization: 0Ul,
+                            GpuUtilization: 0Ul,
+                            MemUtilization: 0F
+                        ),
+                        (a, mo) =>
+                        {
+                            processIdToGpu.TryGetValue(mo["IDProcess"].ToString()!, out ulong gpuUtilization);
 
-                    return new ProcessRecord(
-                        Id: (uint)mo["IDProcess"],
-                        Name: (string)mo["Name"],
-                        CpuUtilization: ((ulong)mo["PercentProcessorTime"]) / (ulong)ProcessorCount,
-                        GpuUtilization: gpuUtilization,
-                        MemoryUtilization: (BToGB((ulong)mo["WorkingSetPrivate"]) * 100) / TotalPhysicalMemory
-                    );
-                })
+                            return new ProcessRecord(
+                                Name: e.Key,
+                                CpuUtilization: a.CpuUtilization + ((ulong)mo["PercentProcessorTime"]) / (ulong)ProcessorCount,
+                                GpuUtilization: a.GpuUtilization + gpuUtilization,
+                                MemUtilization: a.MemUtilization + (BToGB((ulong)mo["WorkingSetPrivate"]) * 100) / TotalPhysicalMemory
+                            );
+                        }
+                    )
+                )
                 .OrderByDescending(p => p.CpuUtilization)
                 .Take(10)
                 .ToList();

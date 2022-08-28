@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using Newtonsoft.Json;
 
 namespace restfulhwinfo
 {
@@ -22,9 +23,10 @@ namespace restfulhwinfo
             app.UseCors("corsapp");
             app.MapGet(
                 "/",
-                () => Results.Json(
+                () => JsonConvert.SerializeObject(
                     new
                     {
+                        date = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds,
                         sensors = HwInfoSensorsReader.ReadData(),
                         processes = ProcessesWmiReader.ReadData()
                     }
