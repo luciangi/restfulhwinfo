@@ -1,6 +1,6 @@
 # restfulhwinfo
 
-restfulhwinfo is a Windows Kotlin Native program for serving HWiNFO sensor readings through RESTful API.
+restfulhwinfo is a C# windows program for serving HWiNFO sensor readings through an RESTful API.
 
 ## Running from source code
 Execute the following command:

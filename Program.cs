@@ -1,45 +1,37 @@
-using Microsoft.Win32;
 using System.Runtime.Versioning;
-using System.Diagnostics;
 
 namespace restfulhwinfo
 {
     [SupportedOSPlatform("windows")]
     class Program
     {
-        static IConfigurationRoot configuration = new ConfigurationBuilder()
+        public static IConfigurationRoot Configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .Build();
-        static string Url = configuration.GetSection("ServerUrl").Value;
-        static string KeyName = configuration.GetSection("HwInfoRegistryKeyName").Value;
-        static RegistryKey RegistryKey = Registry.CurrentUser.OpenSubKey(KeyName) ?? throw new InvalidOperationException("Registry key not found!");
+        private static string Url = Configuration.GetSection("ServerUrl").Value;
+        private static HwInfoSensorsReader HwInfoSensorsReader = new HwInfoSensorsReader();
+        private static ProcessesWmiReader ProcessesWmiReader = new ProcessesWmiReader();
 
         static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
-            {
-                builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-            }));
-            var app = builder.Build();
+            builder.Services.AddCors(p => p.AddPolicy("corsapp", b => { b.WithOrigins("*").AllowAnyMethod().AllowAnyHeader(); }));
 
+            var app = builder.Build();
             app.UseCors("corsapp");
             app.MapGet(
                 "/",
-                () => Results.Json(GetHwInfoSensorData())
+                () => Results.Json(
+                    new
+                    {
+                        sensors = HwInfoSensorsReader.ReadData(),
+                        processes = ProcessesWmiReader.ReadData()
+                    }
+                )
             );
 
             app.Run(Url);
-        }
-
-        private static object GetHwInfoSensorData()
-        {
-            return RegistryKey
-                        .GetValueNames()
-                        .ToList()
-                        .GroupBy(e => string.Join("", e.Reverse().TakeWhile(c => char.IsDigit(c)).Reverse()))
-                        .ToDictionary(e => e.Key, e => e.ToList().ToDictionary(label => label, label => RegistryKey.GetValue(label)));
         }
     }
 }
