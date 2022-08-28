@@ -14,11 +14,11 @@ namespace restfulhwinfo
             [property:JsonProperty("Gpu")]
             ulong GpuUtilization,
             [property:JsonProperty(PropertyName = "Mem")]
-            ulong MemUtilization
+            double MemUtilization
         );
 
         private int ProcessorCount = Environment.ProcessorCount;
-        private float TotalPhysicalMemory;
+        private double TotalPhysicalMemory;
         private ManagementObjectSearcher cpuSearcher;
         private ManagementObjectSearcher gpuSearcher;
 
@@ -77,7 +77,7 @@ namespace restfulhwinfo
                                 Name: e.Key,
                                 CpuUtilization: a.CpuUtilization + ((ulong)mo["PercentProcessorTime"]) / (ulong)ProcessorCount,
                                 GpuUtilization: a.GpuUtilization + gpuUtilization,
-                                MemUtilization: a.MemUtilization + (ulong)((BToGB((ulong)mo["WorkingSetPrivate"]) * 100) / TotalPhysicalMemory)
+                                MemUtilization: Math.Round(a.MemUtilization + (BToGB((ulong)mo["WorkingSetPrivate"]) *100) / TotalPhysicalMemory)
                             );
                         }
                     )
@@ -87,9 +87,9 @@ namespace restfulhwinfo
                 .ToList();
         }
 
-        private float BToGB(ulong value)
+        private double BToGB(ulong value)
         {
-            return value / (1024 * 1024 * 1024);
+            return value / (1024D * 1024D * 1024D);
         }
     }
 }
