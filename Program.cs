@@ -1,13 +1,18 @@
 using Microsoft.Win32;
 using System.Runtime.Versioning;
+using System.Diagnostics;
 
 namespace restfulhwinfo
 {
     [SupportedOSPlatform("windows")]
     class Program
     {
-        const string Url = "http://localhost:60000";
-        const string KeyName = "SOFTWARE\\HWiNFO64\\VSB";
+        static IConfigurationRoot configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+        static string Url = configuration.GetSection("ServerUrl").Value;
+        static string KeyName = configuration.GetSection("HwInfoRegistryKeyName").Value;
         static RegistryKey RegistryKey = Registry.CurrentUser.OpenSubKey(KeyName) ?? throw new InvalidOperationException("Registry key not found!");
 
         static void Main(string[] args)
@@ -22,13 +27,13 @@ namespace restfulhwinfo
             app.UseCors("corsapp");
             app.MapGet(
                 "/",
-                () => Results.Json(GetValueNames())
+                () => Results.Json(GetHwInfoSensorData())
             );
 
             app.Run(Url);
         }
 
-        private static object GetValueNames()
+        private static object GetHwInfoSensorData()
         {
             return RegistryKey
                         .GetValueNames()
