@@ -2,7 +2,7 @@ using System.Management;
 using System.Runtime.Versioning;
 using Newtonsoft.Json;
 
-namespace restfulhwinfo
+namespace WinHwMetrics
 {
     [SupportedOSPlatform("windows")]
     class ProcessesWmiReader
@@ -77,7 +77,7 @@ namespace restfulhwinfo
                                 Name: e.Key,
                                 CpuUtilization: a.CpuUtilization + ((ulong)mo["PercentProcessorTime"]) / (ulong)ProcessorCount,
                                 GpuUtilization: a.GpuUtilization + gpuUtilization,
-                                MemUtilization: Math.Round(a.MemUtilization + (BToGB((ulong)mo["WorkingSetPrivate"]) *100) / TotalPhysicalMemory)
+                                MemUtilization: Math.Round(a.MemUtilization + (BToGB((ulong)mo["WorkingSetPrivate"]) * 100) / TotalPhysicalMemory)
                             );
                         }
                     )

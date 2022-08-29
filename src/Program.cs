@@ -1,7 +1,7 @@
 using System.Runtime.Versioning;
 using Newtonsoft.Json;
 
-namespace restfulhwinfo
+namespace WinHwMetrics
 {
     [SupportedOSPlatform("windows")]
     class Program

@@ -1,6 +1,7 @@
-# restfulhwinfo
+# winhwmetrics
 
-restfulhwinfo is a C# windows program for serving HWiNFO sensor readings through an RESTful API.
+winhwmetrics is a C# windows program for aggregating windows metrics and sensor readings through an RESTful API.
+Currently serves data from HWiNFO and WMI.
 
 ## Running from source code
 Execute the following command:
@@ -16,4 +17,4 @@ Run the following command:
 dotnet publish -r win10-x64 -c Release /p:PublishSingleFile=true --self-contained
 ```
 
-The server can be started by executing the generated .exe file found here: `<project_path>/bin/Release/net6.0/win10-x64/publish/restfulhwinfo.exe`
+The server can be started by executing the generated .exe file found here: `<project_path>/bin/Release/net6.0/win10-x64/publish/winhwmetrics.exe`

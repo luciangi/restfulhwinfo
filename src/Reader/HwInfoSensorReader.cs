@@ -1,7 +1,7 @@
 using Microsoft.Win32;
 using System.Runtime.Versioning;
 
-namespace restfulhwinfo
+namespace WinHwMetrics
 {
     [SupportedOSPlatform("windows")]
     class HwInfoSensorsReader
