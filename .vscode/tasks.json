@@ -7,19 +7,6 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/winhwmetrics.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/winhwmetrics.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -34,6 +21,28 @@
                 "run",
                 "--project",
                 "${workspaceFolder}/winhwmetrics.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "buildWatch",
+            "dependsOn": [
+                "build",
+                "watch"
+            ]
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "-r",
+                "win10-x64",
+                "-c",
+                "Release",
+                "/p:PublishSingleFile=true",
+                "--self-contained"
             ],
             "problemMatcher": "$msCompile"
         }
