@@ -16,7 +16,8 @@ namespace WinHwMetrics
                         .GetValueNames()
                         .ToList()
                         .GroupBy(e => string.Join("", e.Reverse().TakeWhile(c => char.IsDigit(c)).Reverse()))
-                        .ToDictionary(e => e.Key, e => e.ToList().ToDictionary(label => label, label => RegistryKey.GetValue(label)));
+                        .Select(e => e.ToList().ToDictionary(label => label, label => RegistryKey.GetValue(label)))
+                        .ToList();
         }
     }
 }

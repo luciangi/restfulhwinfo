@@ -9,11 +9,11 @@ namespace WinHwMetrics
     {
         public record ProcessRecord(
             string Name,
-            [property:JsonProperty("Cpu")]
+            [property:JsonProperty("CPU %")]
             ulong CpuUtilization,
-            [property:JsonProperty("Gpu")]
+            [property:JsonProperty("GPU %")]
             ulong GpuUtilization,
-            [property:JsonProperty(PropertyName = "Mem")]
+            [property:JsonProperty(PropertyName = "MEM %")]
             double MemUtilization
         );
 
@@ -83,6 +83,8 @@ namespace WinHwMetrics
                     )
                 )
                 .OrderByDescending(p => p.CpuUtilization)
+                .ThenByDescending(p => p.GpuUtilization)
+                .ThenByDescending(p => p.MemUtilization)
                 .Take(5)
                 .ToList();
         }
